@@ -1,6 +1,18 @@
 
 import {useState, useEffect} from 'react'
 import './App.css'
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip
+} from 'recharts'
+import Education from './Education'
+import TickMap from './TickMap'
+import ReportForm from './ReportForm'
 
 
 
@@ -22,6 +34,15 @@ function App() {
       month: {}
     })
 
+    const topSpecies = Object.entries(statistics.species).sort((a,b) => b[1] - a[1])[0]
+    const topMonth = Object.entries(statistics.month).sort((a, b) => b[1] - a[1])[0]
+
+    const monthlyData = Object.entries(statistics.month)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([month, count]) => ({
+      month,
+      sightings: count
+    }))
 
 
     function loadSightings() {
@@ -198,8 +219,65 @@ function App() {
                 : 'Loading...'}
             </p>
           </article>
+          
+          <article className="stat-card">
+            <h3>Most reported species</h3>
+            <p className="stat-value">
+              {topSpecies ? topSpecies[0] : 'Loading...'}
+            </p>
+            {topSpecies && <p>{topSpecies[1]} sightings</p>}
+          </article>
+          
+          <article className="stat-card">
+            <h3>Busiest month</h3>
+            <p className="stat-value">
+              {topMonth ? topMonth[0] : 'Loading...'}
+            </p>
+            {topMonth && <p>{topMonth[1]} sightings</p>}
+          </article>
+
+
         </div>
       </section>
+      
+      <section className="chart-section">
+        <h2>Seasonal Tick Activity</h2>
+        <p>Explore how reported sightings change over time.</p>
+
+        <div className="chart-container">
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart data={monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="sightings"
+                stroke="#0072ce"
+                strokeWidth={3}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      <section>
+        <TickMap
+          sightingsByLocation={statistics.location}
+          sightings={sightings}
+        />
+      </section>
+
+      <section>
+        <ReportForm />
+      </section>
+
+      <section>
+        <Education />
+      </section>
+
       <section>
             <h2>Recent Sightings</h2>
 
@@ -210,11 +288,13 @@ function App() {
             {!loading && !error && (
               
               <div className="sightings-grid">
-                {sightings.map(sighting => (
+                {[...sightings]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 10)
+                .map(sighting => (
                   <article className="sighting-card" key={sighting.id}>
                     <div className="card-top">
                       <span className="species-label">Tick sighting</span>
-                      <span className="sighting-id">#{sighting.id}</span>
                     </div>
 
                     <h3>{sighting.species}</h3>
@@ -224,7 +304,12 @@ function App() {
                     </p>
 
                     <p className="sighting-date">
-                      <span aria-hidden="true">📅</span> {sighting.date}
+                      <span aria-hidden="true">📅</span>{' '}
+                      {new Date(sighting.date).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
                     </p>
                   </article>
                 ))}

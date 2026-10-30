@@ -19,13 +19,14 @@ def save_sighting(species, date, location):
 
     data = (species, date, location)
     connection = sqlite3.connect("sightings.db")
+    try :
+        connection.execute("""
+            INSERT INTO reports (species, date, location)
+            VALUES (?, ?, ?) 
+        """,
+        data)
 
-    connection.execute("""
-        INSERT INTO reports (species, date, location)
-        VALUES (?, ?, ?) 
-    """,
-    data)
-
-    connection.commit()
-    connection.close()
+        connection.commit()
+    finally :
+        connection.close()
 

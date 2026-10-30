@@ -1,8 +1,23 @@
 
 :root {
   font-family: Arial, Helvetica, sans-serif;
-  color: #1f2937;
-  background: #f8faf9;
+  color: #263746;
+  background: #f3f7fb;
+
+  --elanco-blue: #0072ce;
+  --elanco-dark-blue: #004b87;
+  --elanco-light-blue: #eaf4fc;
+
+  --text-primary: #263746;
+  --text-secondary: #64748b;
+
+  --background: #f3f7fb;
+  --surface: #ffffff;
+  --border: #dce5ed;
+
+  --success: #16845b;
+  --danger: #dc4545;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,6 +32,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 button,
@@ -26,5 +43,5 @@ select {
 }
 
 a {
-  color: inherit;
+  color: var(--elanco-blue);
 }

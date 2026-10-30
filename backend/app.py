@@ -1,12 +1,14 @@
 from flask import Flask, jsonify, request
 from data_service import fetch_sightings, filter_sightings, count_sightings, count_by_species, count_by_location, count_by_month
-from database import save_sighting
+from database import save_sighting, init_db
 from flask_cors import CORS
 import requests
 import sqlite3
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"])
+
+init_db()
 
 
 @app.route("/api/health", methods=["GET"])
@@ -62,7 +64,7 @@ def det_statistics():
     except ValueError:
         return jsonify({
             "error": "Elanco returned data in an unexpected format"
-        }), 50
+        }), 502
 
 @app.route("/api/reports", methods=["POST"])
 def submit_sighting():
@@ -88,7 +90,8 @@ def submit_sighting():
                         return jsonify({
                             "message":"Report saved successfully"
                         }), 201
-                    except sqlite3.Error :
+                    except sqlite3.Error as e:
+                        print("DATABASE ERROR:", e)
                         return jsonify({
                             "error": "Internal server error"
                         }), 500
