@@ -1,5 +1,5 @@
 
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import './App.css'
 import {
   ResponsiveContainer,
@@ -26,6 +26,13 @@ function App() {
     const [location, setLocation] = useState('')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
+
+    const sightingsRef = useRef(null)
+    const [shouldScrollToSightings, setShouldScrollToSightings] = useState(false)
+
+    const filtersApplied = Boolean(
+      location.trim() || startDate || endDate
+    )
 
     const [statistics, setStatistics] = useState({
       total: null,
@@ -111,6 +118,17 @@ function App() {
           loadStatistics()
         }, [])
 
+      useEffect(() => {
+        if (!loading && shouldScrollToSightings) {
+          sightingsRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          })
+
+          setShouldScrollToSightings(false)
+        }
+      }, [loading, shouldScrollToSightings])
+
     return (
       <div className="app">
         <header>
@@ -123,6 +141,7 @@ function App() {
 
         <form onSubmit={event => {
           event.preventDefault()
+          setShouldScrollToSightings(true)
           loadSightings()
         }}>
           <label>
@@ -162,6 +181,7 @@ function App() {
                 setLocation('')
                 setStartDate('')
                 setEndDate('')
+                setShouldScrollToSightings(false)
 
                 setLoading(true)
                 setError(null)
@@ -278,7 +298,7 @@ function App() {
         <Education />
       </section>
 
-      <section>
+      <section ref={sightingsRef} className="sightings-section">
             <h2>Recent Sightings</h2>
 
             {loading && <p>Loading sightings...</p>}
@@ -290,7 +310,7 @@ function App() {
               <div className="sightings-grid">
                 {[...sightings]
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 10)
+                .slice(0, filtersApplied ? undefined : 10)
                 .map(sighting => (
                   <article className="sighting-card" key={sighting.id}>
                     <div className="card-top">
